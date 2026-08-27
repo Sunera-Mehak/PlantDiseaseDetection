@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plant Disease Detection Using Convolutional Neural Networks</title>
+  <meta name="description" content="Detect plant diseases from a leaf image using deep learning.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container">
+      <a href="#home" class="nav-brand">
+        <!-- Plant SVG Icon -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 8C8 10 5.9 16.5 4.2 20C4.1 19.3 4 18.7 4 18C4 10.3 10.3 4 18 4C18.7 4 19.3 4.1 20 4.2C16.5 5.9 10 8 8 17"/>
+          <path d="M12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2ZM17 15.5C13.5 15.5 10.5 13.5 9 10.5C9 8.5 10 6.5 11.5 5.5C14.5 5.5 17 8 17 11.5V15.5Z"/>
+        </svg>
+        <span>PlantDetect</span>
+      </a>
+
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home" class="nav-link">Home</a></li>
+        <li><a href="#detect" class="nav-link">Detect</a></li>
+        <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+        <li><a href="#about" class="nav-link">About</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <!-- 1. Hero Section -->
+    <section id="home" class="hero">
+      <div class="container">
+        <h1 class="hero-title">Plant Disease Detection</h1>
+        <p class="hero-subtitle">Detect plant diseases from a leaf image using deep learning.</p>
+        <a href="#detect" class="btn-primary-rounded">
+          <span>Analyze a Leaf →</span>
+        </a>
+        <div class="hero-visual">
+          <div class="hero-visual-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M17 8C8 10 5.9 16.5 4.2 20C4.1 19.3 4 18.7 4 18C4 10.3 10.3 4 18 4C18.7 4 19.3 4.1 20 4.2C16.5 5.9 10 8 8 17"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Centered Detection Section (Main Feature) -->
+    <section id="detect" class="section">
+      <div class="container">
+        <h2 class="section-title">Analyze Your Plant</h2>
+        <p class="section-subtitle">Upload a clear leaf image to identify its disease.</p>
+
+        <div class="detect-card-centered">
+          
+          <!-- Upload Area -->
+          <div class="upload-area" id="uploadArea">
+            <div class="upload-icon-circle">
+              <svg viewBox="0 0 24 24">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+            </div>
+            <div class="upload-title">＋ Upload Leaf Image</div>
+            <div class="upload-subtext">Drag & drop or browse</div>
+            <div class="upload-format-tag">Supported formats: JPG • JPEG • PNG</div>
+            <input type="file" id="fileInput" class="file-input" accept="image/jpeg,image/jpg,image/png">
+          </div>
+
+          <!-- Selected Preview Area -->
+          <div class="preview-card" id="previewCard">
+            <div class="preview-img-wrapper">
+              <img id="previewImg" class="preview-img-element" alt="Leaf Preview">
+            </div>
+            
+            <div class="file-meta-bar">
+              <span class="file-name-badge" id="fileNameBadge">leaf_image.jpg</span>
+              <button type="button" class="btn-remove-small" id="removeBtn">Remove</button>
+            </div>
+
+            <button type="button" class="btn-primary-rounded btn-analyze-large" id="analyzeBtn">
+              <span>Analyze Leaf</span>
+            </button>
+          </div>
+
+          <!-- Error Banner -->
+          <div id="errorBanner" class="error-banner" style="display: none;"></div>
+
+          <!-- Result Card (Clean White) -->
+          <div class="result-card-clean" id="resultCard" style="display: none;">
+            <div class="result-card-header">
+              <span class="result-card-title">Detection Result</span>
+            </div>
+
+            <div class="disease-prediction-name" id="diseasePredictionName">Awaiting Prediction</div>
+
+            <div class="confidence-section">
+              <div class="confidence-header">
+                <span class="confidence-title">Confidence</span>
+                <span class="confidence-value-text" id="confidenceValueText">--%</span>
+              </div>
+              <div class="confidence-bar-track">
+                <div class="confidence-bar-fill" id="confidenceBarFill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Cause Section -->
+            <div class="pathology-info-box" style="margin-top: 20px;">
+              <div class="pathology-info-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>Reason / Cause</span>
+              </div>
+              <div class="pathology-info-text" id="diseaseCauseText">--</div>
+            </div>
+
+            <!-- AI Prevention Suggestions Section -->
+            <div class="pathology-info-box" style="margin-top: 16px;">
+              <div class="pathology-info-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span>AI Prevention Suggestions</span>
+              </div>
+              <ul class="prevention-list" id="diseasePreventionList">
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- Empty State View -->
+          <div class="empty-state-view" id="emptyStateView">
+            <svg class="empty-state-icon" viewBox="0 0 24 24">
+              <path d="M17 8C8 10 5.9 16.5 4.2 20C4.1 19.3 4 18.7 4 18C4 10.3 10.3 4 18 4C18.7 4 19.3 4.1 20 4.2C16.5 5.9 10 8 8 17"/>
+            </svg>
+            <div class="empty-state-text">Upload a leaf image to get started</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. How It Works Section -->
+    <section id="how-it-works" class="section">
+      <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Three simple steps to detect plant health status.</p>
+
+        <div class="how-grid">
+          
+          <div class="how-card">
+            <div class="how-step-badge">01 Upload</div>
+            <h3 class="how-title">Upload Image</h3>
+            <p class="how-desc">Upload a leaf image.</p>
+          </div>
+
+          <div class="how-card">
+            <div class="how-step-badge">02 Analyze</div>
+            <h3 class="how-title">Neural Analysis</h3>
+            <p class="how-desc">CNN analyzes the image.</p>
+          </div>
+
+          <div class="how-card">
+            <div class="how-step-badge">03 Detect</div>
+            <h3 class="how-title">Instant Results</h3>
+            <p class="how-desc">Receive the predicted disease and confidence.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Model Section -->
+    <section id="model" class="section">
+      <div class="container">
+        <h2 class="section-title">Powered by Deep Learning</h2>
+        <p class="section-subtitle" style="max-width: 600px; margin-left: auto; margin-right: auto;">
+          A Convolutional Neural Network analyzes the visual features of the leaf and predicts the most likely disease class.
+        </p>
+
+        <div class="model-badges-grid">
+          <div class="model-badge-card">CNN</div>
+          <div class="model-badge-card">256 × 256 Input</div>
+          <div class="model-badge-card">TensorFlow.js</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. About Section -->
+    <section id="about" class="section" style="background-color: var(--bg-primary); border-top: 1px solid var(--border-light);">
+      <div class="container">
+        <h2 class="section-title">Helping identify plant diseases faster.</h2>
+        
+        <div class="about-card-clean">
+          <p class="about-card-text">
+            “Upload a plant leaf image and let the trained CNN identify the most likely disease.”
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 6. Minimal Footer -->
+  <footer class="footer-minimal">
+    <div class="container">
+      <div class="footer-brand">PlantDetect</div>
+      <div class="footer-subtitle">Plant Disease Detection using CNN</div>
+      
+      <ul class="footer-links">
+        <li><a href="#home" class="footer-link">Home</a></li>
+        <li><span style="color: var(--text-tertiary);">|</span></li>
+        <li><a href="#detect" class="footer-link">Detect</a></li>
+        <li><span style="color: var(--text-tertiary);">|</span></li>
+        <li><a href="#about" class="footer-link">About</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="js/classLabels.js"></script>
+  <script src="js/diseaseInfo.js"></script>
+  <script src="js/modelWeights.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/predict.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
